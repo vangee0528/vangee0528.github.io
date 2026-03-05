@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="vangee - 全栈开发者 | Python · C/C++ · Flutter · MATLAB">
+    <title>vangee | 我们必将知道 我们终将知道</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-text">vangee</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="active">首页</a>
+                <a href="articles.html">文章</a>
+                <a href="projects.html">项目</a>
+                <a href="about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+            <button class="nav-menu-btn" id="menuBtn" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <a href="index.html">首页</a>
+            <a href="articles.html">文章</a>
+            <a href="projects.html">项目</a>
+            <a href="about.html">关于</a>
+        </div>
+    </div>
+
+    <!-- Hero区域 -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title fade-in">
+                    <span class="greeting">你好，我是</span>
+                    <span class="name">vangee</span>
+                </h1>
+                <p class="hero-subtitle fade-in-delay">Python · C/C++ · Flutter · MATLAB</p>
+                <p class="hero-motto fade-in-delay-2">"我们必将知道 我们终将知道"</p>
+                <div class="hero-actions fade-in-delay-3">
+                    <a href="articles.html" class="btn btn-primary">阅读文章</a>
+                    <a href="about.html" class="btn btn-secondary">了解更多</a>
+                </div>
+            </div>
+            <div class="hero-visual fade-in-delay-2">
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="filename">hello.py</span>
+                    </div>
+                    <pre class="code-content"><code><span class="keyword">class</span> <span class="variable">Developer</span>:
+    <span class="keyword">def</span> <span class="variable">__init__</span>(self):
+        self.name = <span class="string">'vangee'</span>
+        self.skills = [
+            <span class="string">'Python'</span>, <span class="string">'C/C++'</span>,
+            <span class="string">'Flutter'</span>, <span class="string">'MATLAB'</span>
+        ]
+        self.motto = <span class="string">"We shall know"</span>
+
+    <span class="keyword">def</span> <span class="variable">create</span>(self):
+        <span class="keyword">print</span>(<span class="string">"Building the future..."</span>)</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速导航 -->
+    <section class="quick-nav">
+        <div class="container">
+            <div class="nav-cards">
+                <a href="articles.html" class="nav-card">
+                    <div class="nav-card-icon">📝</div>
+                    <h3>技术文章</h3>
+                    <p>Python、C/C++、Flutter、MATLAB 学习笔记</p>
+                </a>
+                <a href="projects.html" class="nav-card">
+                    <div class="nav-card-icon">🚀</div>
+                    <h3>项目展示</h3>
+                    <p>个人项目与开源作品</p>
+                </a>
+                <a href="about.html" class="nav-card">
+                    <div class="nav-card-icon">👋</div>
+                    <h3>关于我</h3>
+                    <p>了解更多关于我的信息</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">vangee</span>
+                    <p class="footer-motto">"我们必将知道 我们终将知道"</p>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">首页</a>
+                    <a href="articles.html">文章</a>
+                    <a href="projects.html">项目</a>
+                    <a href="about.html">关于</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vangee0528.github.io/sitemap.xml

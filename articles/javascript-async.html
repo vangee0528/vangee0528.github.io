@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深入理解 JavaScript 异步编程 | vangee</title>
+    <meta name="description" content="从回调地狱到 Promise，再到 async/await，全面解析 JavaScript 异步编程的演进历程。">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <span class="logo-text">vangee</span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html#about">关于</a>
+                <a href="../index.html#articles">文章</a>
+                <a href="../index.html#projects">项目</a>
+                <a href="../index.html#skills">技能</a>
+                <a href="../index.html#contact">联系</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 文章内容 -->
+    <article class="article-page">
+        <header class="article-header">
+            <div class="container">
+                <a href="../index.html#articles" class="back-link">← 返回文章列表</a>
+                <h1 class="article-title">深入理解 JavaScript 异步编程</h1>
+                <div class="article-meta">
+                    <span class="article-tag">前端</span>
+                    <span>2026-02-28</span>
+                    <span>·</span>
+                    <span>12 分钟阅读</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="article-content">
+            <div class="container">
+                <p class="lead">从回调地狱到 Promise，再到 async/await，JavaScript 异步编程经历了漫长的演进。本文将带你深入理解每一种方案的本质与最佳实践。</p>
+
+                <h2>为什么需要异步？</h2>
+                <p>JavaScript 是单线程语言，这意味着同一时间只能执行一个任务。如果所有操作都是同步的，那么像网络请求、文件读取这样的耗时操作会阻塞整个程序。</p>
+
+                <h2>回调函数时代</h2>
+                <p>最早的异步方案是回调函数：</p>
+                <pre><code>fs.readFile('file1.txt', (err, data1) => {
+    fs.readFile('file2.txt', (err, data2) => {
+        fs.readFile('file3.txt', (err, data3) => {
+            // 回调地狱...
+        });
+    });
+});</code></pre>
+
+                <p>这种方式的问题显而易见：难以维护、难以错误处理、难以测试。</p>
+
+                <h2>Promise 的救赎</h2>
+                <p>ES6 引入的 Promise 提供了更优雅的链式调用：</p>
+                <pre><code>readFile('file1.txt')
+    .then(data1 => readFile('file2.txt'))
+    .then(data2 => readFile('file3.txt'))
+    .then(data3 => console.log(data3))
+    .catch(err => console.error(err));</code></pre>
+
+                <h2>async/await：同步写法的异步代码</h2>
+                <p>ES2017 的 async/await 让异步代码看起来像同步代码：</p>
+                <pre><code>async function readAllFiles() {
+    try {
+        const data1 = await readFile('file1.txt');
+        const data2 = await readFile('file2.txt');
+        const data3 = await readFile('file3.txt');
+        console.log(data3);
+    } catch (err) {
+        console.error(err);
+    }
+}</code></pre>
+
+                <h2>最佳实践</h2>
+                <ul>
+                    <li>优先使用 async/await，代码更清晰</li>
+                    <li>并行操作使用 Promise.all()</li>
+                    <li>错误处理不要忘记 try/catch</li>
+                    <li>避免混合使用 then 和 await</li>
+                </ul>
+
+                <h2>总结</h2>
+                <p>JavaScript 异步编程的演进反映了语言设计者对开发者体验的持续关注。从回调到 Promise 再到 async/await，每一步都在解决上一个方案的问题。理解这些演进，能帮助我们写出更好的异步代码。</p>
+            </div>
+        </div>
+    </article>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none; padding-top: 0;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+                <p>Built with ❤️ and code.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的主题切换
+        const themeBtn = document.getElementById('themeBtn');
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+
+    <style>
+        .article-page {
+            padding-top: 100px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .article-header {
+            margin-bottom: 60px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        .back-link:hover {
+            color: var(--accent);
+        }
+        .article-page .article-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+        .article-page .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+        }
+        .article-content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+        }
+        .article-content p,
+        .article-content ul,
+        .article-content pre {
+            margin-bottom: 24px;
+        }
+        .article-content h2 {
+            font-size: 1.75rem;
+            margin: 48px 0 24px;
+        }
+        .article-content pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        .article-content code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+        .article-content ul {
+            padding-left: 24px;
+        }
+        .article-content li {
+            margin-bottom: 8px;
+        }
+        .lead {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</body>
+</html>

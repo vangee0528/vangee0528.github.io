@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深入理解 Python 异步编程 | vangee</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo"><span class="logo-text">vangee</span></a>
+            <div class="nav-links">
+                <a href="../index.html">首页</a>
+                <a href="../articles.html">文章</a>
+                <a href="../projects.html">项目</a>
+                <a href="../about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <article class="article-page">
+        <header class="article-header">
+            <a href="../articles.html" class="back-link">← 返回文章列表</a>
+            <h1 class="article-title">深入理解 Python 异步编程</h1>
+            <div class="article-meta">
+                <span class="article-tag tag-python">Python</span>
+                <span>2026-02-28</span>
+                <span>·</span>
+                <span>12 分钟阅读</span>
+            </div>
+        </header>
+
+        <div class="article-content">
+            <p class="lead">从 asyncio 到协程，全面解析 Python 异步编程的核心概念与最佳实践。</p>
+
+            <h2>为什么需要异步？</h2>
+            <p>Python 的 GIL（全局解释器锁）使得多线程在 CPU 密集型任务中效率不高。但对于 I/O 密集型任务（网络请求、文件读写、数据库查询），异步编程可以显著提升性能。</p>
+
+            <h2>协程基础</h2>
+            <p>协程是异步编程的核心。使用 <code>async def</code> 定义协程函数：</p>
+            <pre><code>import asyncio
+
+async def fetch_data():
+    print("开始获取数据...")
+    await asyncio.sleep(1)  # 模拟 I/O 操作
+    print("数据获取完成!")
+    return {"status": "ok"}
+
+# 运行协程
+result = asyncio.run(fetch_data())</code></pre>
+
+            <h2>asyncio 核心概念</h2>
+            <p><strong>事件循环（Event Loop）</strong>：异步任务的调度中心，负责管理和执行协程。</p>
+            <p><strong>Task</strong>：协程的封装，可以在事件循环中调度执行。</p>
+            <pre><code>async def main():
+    # 并发执行多个任务
+    task1 = asyncio.create_task(fetch_data())
+    task2 = asyncio.create_task(fetch_data())
+    
+    result1, result2 = await asyncio.gather(task1, task2)
+    print(result1, result2)
+
+asyncio.run(main())</code></pre>
+
+            <h2>async/await 最佳实践</h2>
+            <ul>
+                <li>使用 <code>asyncio.gather()</code> 并发执行多个任务</li>
+                <li>使用 <code>asyncio.wait()</code> 获取更精细的控制</li>
+                <li>避免在协程中使用 <code>time.sleep()</code>，使用 <code>asyncio.sleep()</code></li>
+                <li>使用 <code>asyncio.run()</code> 作为入口点</li>
+            </ul>
+
+            <h2>异步上下文管理器</h2>
+            <pre><code>class AsyncContextManager:
+    async def __aenter__(self):
+        print("进入上下文")
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        print("退出上下文")
+
+async def main():
+    async with AsyncContextManager() as cm:
+        print("执行操作")</code></pre>
+
+            <h2>总结</h2>
+            <p>Python 异步编程通过协程和事件循环实现了高效的并发 I/O 处理。掌握 async/await 语法和 asyncio 模块，可以显著提升程序性能。</p>
+        </div>
+    </article>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <style>
+        .article-page { padding: 120px 24px 80px; max-width: 800px; margin: 0 auto; }
+        .article-header { margin-bottom: 48px; }
+        .back-link { display: inline-block; margin-bottom: 24px; color: var(--text-secondary); text-decoration: none; }
+        .back-link:hover { color: var(--accent); }
+        .article-page .article-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; }
+        .article-page .article-meta { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); }
+        .article-content { font-size: 1.125rem; line-height: 1.8; }
+        .article-content h2 { font-size: 1.5rem; margin: 48px 0 24px; color: var(--text-primary); }
+        .article-content p { margin-bottom: 20px; color: var(--text-secondary); }
+        .article-content ul, .article-content pre { margin-bottom: 24px; }
+        .article-content pre { background: var(--code-bg); color: var(--code-text); padding: 20px; border-radius: 12px; overflow-x: auto; }
+        .article-content code { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+        .article-content ul { padding-left: 24px; color: var(--text-secondary); }
+        .article-content li { margin-bottom: 8px; }
+        .lead { font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 32px; }
+    </style>
+</body>
+</html>

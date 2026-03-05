@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="vangee 的项目展示">
+    <title>项目 | vangee</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-text">vangee</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="articles.html">文章</a>
+                <a href="projects.html" class="active">项目</a>
+                <a href="about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+            <button class="nav-menu-btn" id="menuBtn" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <a href="index.html">首页</a>
+            <a href="articles.html">文章</a>
+            <a href="projects.html">项目</a>
+            <a href="about.html">关于</a>
+        </div>
+    </div>
+
+    <!-- 项目列表 -->
+    <section class="page-content">
+        <div class="container">
+            <h1 class="page-title">项目展示</h1>
+            <p class="page-subtitle">用代码创造价值</p>
+
+            <div class="projects-placeholder">
+                <div class="placeholder-icon">🚧</div>
+                <h2>正在建设中...</h2>
+                <p>项目整理中，敬请期待</p>
+                <p class="placeholder-hint">后续将展示 Python、Flutter、C++ 等方向的个人项目</p>
+            </div>
+
+            <!-- 项目占位卡片 -->
+            <div class="projects-coming">
+                <div class="coming-card">
+                    <div class="coming-icon">🐍</div>
+                    <h3>Python 项目</h3>
+                    <p>数据处理、自动化脚本、Web 后端</p>
+                </div>
+                <div class="coming-card">
+                    <div class="coming-icon">📱</div>
+                    <h3>Flutter 应用</h3>
+                    <p>跨平台移动应用开发</p>
+                </div>
+                <div class="coming-card">
+                    <div class="coming-icon">⚙️</div>
+                    <h3>C/C++ 项目</h3>
+                    <p>系统编程、算法实现</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
