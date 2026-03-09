@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ 内存模型：从 happens-before 到原子操作 | vangee</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/article.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo"><span class="logo-text">vangee</span></a>
+            <div class="nav-links">
+                <a href="../index.html">首页</a>
+                <a href="../pages/articles.html">文章</a>
+                <a href="../pages/projects.html">项目</a>
+                <a href="../pages/about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <article class="article-page">
+        <header class="article-header">
+            <a href="../pages/articles.html" class="back-link">← 返回文章列表</a>
+            <h1 class="article-title">C++ 内存模型：从 happens-before 到原子操作</h1>
+            <div class="article-meta">
+                <span class="article-tag tag-cpp">C++</span>
+                <span>2026-03-09</span>
+                <span>·</span>
+                <span>30 分钟阅读</span>
+            </div>
+        </header>
+
+        <div class="article-content">
+            <p class="lead">为什么单纯的 atomic<bool> 不能保证线程安全？memory_order 到底意味着什么？理解 C++ 内存模型，才能写出真正正确的并发代码。</p>
+
+            <h2>内存模型要解决什么问题</h2>
+            <p>现代 CPU 和编译器会做各种优化，这些优化在单线程环境下没问题，但在多线程环境下会导致意想不到的结果：</p>
+            <pre><code>// 线程 1
+x = 1;
+y = 1;
+
+// 线程 2
+while (y == 0);  // 等待 y 变为 1
+assert(x == 1);  // 这个断言可能失败！</code></pre>
+            <p>为什么会失败？</p>
+            <ul>
+                <li><strong>编译器重排</strong>：编译器可能把 y = 1 移到 x = 1 前面</li>
+                <li><strong>CPU 乱序执行</strong>：CPU 可能先执行 y = 1，因为 x 的 cache line 正好被其他核占用</li>
+                <li><strong>缓存可见性</strong>：线程 2 看到的 y 可能已经更新，但 x 还在旧缓存中</li>
+            </ul>
+            <p>内存模型定义了在多线程环境下，什么样的内存操作顺序是有保证的。</p>
+
+            <h2>happens-before 关系</h2>
+            <p>这是理解内存模型的核心概念。如果操作 A happens-before 操作 B，那么 A 的效果对 B 可见。</p>
+            <p>happens-before 的建立方式：</p>
+            <ol>
+                <li><strong>同一线程内</strong>：如果 A 在代码中位于 B 之前，A sequenced-before B</li>
+                <li><strong>线程同步</strong>：锁的释放 happens-before 后续对同一锁的获取</li>
+                <li><strong>原子操作</strong>：特定的原子操作顺序可以建立 happens-before</li>
+            </ol>
+            <pre><code>// sequenced-before 示例
+int x = 0;
+x = 1;       // A
+int y = x;   // B，A sequenced-before B，所以 y 一定是 1</code></pre>
+
+            <h2>std::atomic 和内存序</h2>
+            <p>默认的 std::atomic 使用 memory_order_seq_cst（顺序一致性），这是最严格的模式，但性能最差：</p>
+            <pre><code>std::atomic&lt;int&gt; x{0};
+
+// 等价于 x.store(1, std::memory_order_seq_cst);
+x = 1;</code></pre>
+            <p>六种内存序（从弱到强）：</p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th style="text-align: left; padding: 12px;">内存序</th>
+                    <th style="text-align: left; padding: 12px;">含义</th>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">memory_order_relaxed</td>
+                    <td style="padding: 12px;">只保证原子性，无顺序约束</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">memory_order_consume</td>
+                    <td style="padding: 12px;">依赖同步（实际很少使用）</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">memory_order_acquire</td>
+                    <td style="padding: 12px;">后续读不能重排到前面</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">memory_order_release</td>
+                    <td style="padding: 12px;">前面写不能重排到后面</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">memory_order_acq_rel</td>
+                    <td style="padding: 12px;">同时具有 acquire 和 release 语义</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;">memory_order_seq_cst</td>
+                    <td style="padding: 12px;">顺序一致性，所有线程看到一致的操作顺序</td>
+                </tr>
+            </table>
+
+            <h2>acquire-release 语义</h2>
+            <p>这是性能与正确性之间的平衡点。使用得当，可以获得接近 relaxed 的性能，同时保证必要的同步。</p>
+            <pre><code>std::atomic&lt;bool&gt; ready{false};
+int data = 0;
+
+// 线程 1（生产者）
+void producer() {
+    data = 42;                                    // A
+    ready.store(true, std::memory_order_release); // B
+}
+
+// 线程 2（消费者）
+void consumer() {
+    while (!ready.load(std::memory_order_acquire)); // C
+    assert(data == 42);                              // D，一定成立！
+}</code></pre>
+            <p>关键点：</p>
+            <ul>
+                <li>release 操作（B）保证：所有前面的内存操作（A）不会重排到 release 之后</li>
+                <li>acquire 操作（C）保证：所有后续的内存操作（D）不会重排到 acquire 之前</li>
+                <li>如果 acquire 看到了 release 写入的值，就建立了 happens-before 关系：A → B → C → D</li>
+            </ul>
+
+            <h2>经典模式：引用计数</h2>
+            <p>acquire-release 的典型应用场景：</p>
+            <pre><code>template&lt;typename T&gt;
+class SharedPtr {
+    struct ControlBlock {
+        T* ptr;
+        std::atomic&lt;int&gt; ref_count{1};
+    };
+    ControlBlock* cb;
+
+public:
+    SharedPtr(const SharedPtr& other) : cb(other.cb) {
+        // 增加引用计数，不需要同步其他线程，用 relaxed 即可
+        cb->ref_count.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    ~SharedPtr() {
+        // 减少引用计数，并获取减少后的值
+        if (cb->ref_count.fetch_sub(1, std::memory_order_acq_rel) == 1) {
+            // 我是最后一个持有者，需要 delete
+            // acq_rel 保证：如果另一个线程刚 release 了这个对象，
+            // 我能看到它对对象做的所有修改
+            delete cb->ptr;
+            delete cb;
+        }
+    }
+
+    T* operator->() const {
+        // 解引用，获取实际指针
+        // 需要 acquire，保证看到其他线程对这个对象的修改
+        std::atomic_thread_fence(std::memory_order_acquire);
+        return cb->ptr;
+    }
+};</code></pre>
+
+            <h2>relaxed 内存序的陷阱</h2>
+            <p>relaxed 只保证原子性，不保证顺序。下面的代码可能有出乎意料的行为：</p>
+            <pre><code>std::atomic&lt;int&gt; x{0};
+std::atomic&lt;int&gt; y{0};
+
+// 线程 1
+x.store(1, std::memory_order_relaxed);
+y.store(1, std::memory_order_relaxed);
+
+// 线程 2
+int r1 = y.load(std::memory_order_relaxed);  // 看到 y = 1
+int r2 = x.load(std::memory_order_relaxed);  // 可能看到 x = 0！
+
+// 结果：r1 = 1, r2 = 0 是可能的！</code></pre>
+            <p>为什么？relaxed 不阻止重排。线程 1 的 y.store 可能先于 x.store 执行，线程 2 恰好在中间看到。</p>
+            <p>relaxed 的适用场景：</p>
+            <ul>
+                <li>纯计数器（如统计请求数量）</li>
+                <li>线程局部状态的标志位</li>
+                <li>多生产者队列中的序列号（需要配合 acquire/release）</li>
+            </ul>
+
+            <h2>seq_cst 的隐藏开销</h2>
+            <p>seq_cst 不仅保证原子性和顺序，还保证所有 seq_cst 操作在所有线程看来有单一的、一致的顺序。</p>
+            <pre><code>// 这个代码在 seq_cst 下是绝对安全的
+std::atomic&lt;int&gt; x{0};
+
+// 线程 1
+x.store(1, std::memory_order_seq_cst);
+
+// 线程 2
+x.store(2, std::memory_order_seq_cst);
+
+// 线程 3
+int r1 = x.load(std::memory_order_seq_cst);
+int r2 = x.load(std::memory_order_seq_cst);
+// r1 和 r2 的可能组合受到限制，不可能看到 "时光倒流"</code></pre>
+            <p>但代价是：x86 上 seq_cst 需要发出 mfence 或 lock 前缀指令，比 acquire-release 慢 2-3 倍。ARM 上差距更大。</p>
+
+            <h2>无锁队列的内存序实践</h2>
+            <p>一个简化版的无锁单生产者单消费者队列：</p>
+            <pre><code>template&lt;typename T&gt;
+class SPSCQueue {
+    static const size_t SIZE = 1024;
+    T buffer[SIZE];
+    alignas(64) std::atomic&lt;size_t&gt; head{0};  // 生产者用
+    alignas(64) std::atomic&lt;size_t&gt; tail{0};  // 消费者用
+
+public:
+    bool push(const T& value) {
+        size_t h = head.load(std::memory_order_relaxed);
+        size_t next = (h + 1) % SIZE;
+        if (next == tail.load(std::memory_order_acquire)) {
+            return false;  // 队列满
+        }
+        buffer[h] = value;
+        head.store(next, std::memory_order_release);  // 发布数据
+        return true;
+    }
+
+    bool pop(T& value) {
+        size_t t = tail.load(std::memory_order_relaxed);
+        if (t == head.load(std::memory_order_acquire)) {
+            return false;  // 队列空
+        }
+        value = buffer[t];
+        tail.store((t + 1) % SIZE, std::memory_order_release);
+        return true;
+    }
+};</code></pre>
+            <p>关键点：</p>
+            <ul>
+                <li>head 和 tail 各自只在单线程修改，可以用 relaxed 读自己的副本</li>
+                <li>读取对方的值需要 acquire，确保看到最新状态</li>
+                <li>写入后用 release，确保对方能看到写入的数据</li>
+                <li>alignas(64) 避免 false sharing</li>
+            </ul>
+
+            <h2>总结</h2>
+            <ul>
+                <li>happens-before 是判断多线程代码正确性的核心概念</li>
+                <li>memory_order_seq_cst 最安全但最慢，默认使用，必要时优化</li>
+                <li>acquire-release 是大多数场景的甜点，建立单向同步</li>
+                <li>relaxed 只保证原子性，不保证顺序，使用时要非常小心</li>
+                <li>无锁编程时，正确选择内存序比算法本身更重要</li>
+            </ul>
+        </div>
+    </article>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>

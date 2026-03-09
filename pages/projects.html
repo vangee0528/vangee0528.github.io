@@ -1,151 +1,24 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="vangee 的项目展示">
     <title>项目 | vangee</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/projects.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        /* 项目卡片样式 */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 24px;
-            margin-top: 48px;
-        }
-
-        .project-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 32px;
-            border: 1px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .project-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-        }
-
-        .project-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-
-        .project-card h3 {
-            font-size: 1.375rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .project-card p {
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-            line-height: 1.7;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-
-        .project-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .project-tags .tag {
-            padding: 5px 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border-radius: 16px;
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-        }
-
-        .project-links {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .project-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all var(--transition-fast);
-        }
-
-        .project-link.primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .project-link.primary:hover {
-            background: var(--accent-hover);
-        }
-
-        .project-link.secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .project-link.secondary:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .project-highlights {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .project-highlights h4 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 10px;
-        }
-
-        .project-highlights ul {
-            margin: 0;
-            padding-left: 20px;
-            color: var(--text-secondary);
-            font-size: 0.8125rem;
-            line-height: 1.6;
-        }
-
-        .project-highlights li {
-            margin-bottom: 4px;
-        }
-
-        @media (max-width: 768px) {
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- 导航栏 -->
     <nav class="nav scrolled" id="nav">
         <div class="nav-container">
-            <a href="index.html" class="nav-logo">
+            <a href="../index.html" class="nav-logo">
                 <span class="logo-text">vangee</span>
             </a>
             <div class="nav-links">
-                <a href="index.html">首页</a>
+                <a href="../index.html">首页</a>
                 <a href="articles.html">文章</a>
                 <a href="projects.html" class="active">项目</a>
                 <a href="about.html">关于</a>
@@ -169,7 +42,7 @@
     <!-- 移动端菜单 -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-content">
-            <a href="index.html">首页</a>
+            <a href="../index.html">首页</a>
             <a href="articles.html">文章</a>
             <a href="projects.html">项目</a>
             <a href="about.html">关于</a>
@@ -178,10 +51,13 @@
 
     <!-- 项目列表 -->
     <section class="page-content">
+        <div class="page-hero">
+            <div class="container">
+                <h1 class="page-title">项目展示</h1>
+                <p class="page-subtitle">用代码创造价值</p>
+            </div>
+        </div>
         <div class="container">
-            <h1 class="page-title">项目展示</h1>
-            <p class="page-subtitle">用代码创造价值</p>
-
             <div class="projects-grid" id="projectsGrid">
                 <!-- 项目卡片将通过 JavaScript 动态加载 -->
             </div>
@@ -197,8 +73,8 @@
         </div>
     </footer>
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script>
         // 动态加载项目列表
         function renderProjects() {

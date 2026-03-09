@@ -14,7 +14,7 @@ const blogData = {
             date: "2026-02-28",
             readTime: "12 分钟",
             image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800",
-            url: "articles/javascript-async.html"
+            url: "posts/javascript-async.html"
         },
         {
             id: 2,
@@ -25,7 +25,7 @@ const blogData = {
             date: "2026-02-20",
             readTime: "15 分钟",
             image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800",
-            url: "articles/react-performance.html"
+            url: "posts/react-performance.html"
         },
         {
             id: 3,
@@ -36,7 +36,7 @@ const blogData = {
             date: "2026-02-15",
             readTime: "10 分钟",
             image: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800",
-            url: "articles/postgresql-advanced.html"
+            url: "posts/postgresql-advanced.html"
         },
         {
             id: 4,
@@ -47,7 +47,7 @@ const blogData = {
             date: "2026-02-10",
             readTime: "18 分钟",
             image: "https://images.unsplash.com/photo-1605745341112-85968b19335b?w=800",
-            url: "articles/docker-compose-microservices.html"
+            url: "posts/docker-compose-microservices.html"
         },
         {
             id: 5,
@@ -58,7 +58,7 @@ const blogData = {
             date: "2026-02-05",
             readTime: "20 分钟",
             image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800",
-            url: "articles/system-design-url-shortener.html"
+            url: "posts/system-design-url-shortener.html"
         },
         {
             id: 6,
@@ -69,7 +69,7 @@ const blogData = {
             date: "2026-01-28",
             readTime: "8 分钟",
             image: "https://images.unsplash.com/photo-1516116216624-53e697fed25a?w=800",
-            url: "articles/typescript-5-features.html"
+            url: "posts/typescript-5-features.html"
         }
     ],
 
@@ -79,11 +79,11 @@ const blogData = {
             id: 1,
             title: "炉羽饰品生产管理系统",
             description: "基于 Flutter 开发的跨平台生产管理应用，支持员工管理、产品管理、生产记录、工资统计等功能。采用 SQLite 本地存储，支持离线运行和 WebDAV 云备份。",
-            tags: ["Flutter", "SQLite", "Provider", "Material Design 3"],
+            tags: ["Flutter", "SQLite", "Provider"],
             image: "🏭",
             github: "",
             demo: "",
-            detail: "projects/luyu_manager.html",
+            detail: "../projects/luyu_manager.html",
             highlights: [
                 "跨平台支持 Windows 和 Android",
                 "计件/计时两种员工工资模式",
@@ -99,7 +99,7 @@ const blogData = {
             image: "📊",
             github: "https://github.com/vangee0528/NA2024",
             demo: "",
-            detail: "projects/na2024.html",
+            detail: "../projects/na2024.html",
             highlights: [
                 "理论作业 4 次，涵盖数值分析核心理论",
                 "编程作业 2 次，C++ 实现方程求解与插值算法",

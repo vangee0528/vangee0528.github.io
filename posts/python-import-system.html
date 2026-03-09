@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Import 系统：从 sys.modules 到 Import Hooks | vangee</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/article.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo"><span class="logo-text">vangee</span></a>
+            <div class="nav-links">
+                <a href="../index.html">首页</a>
+                <a href="../pages/articles.html">文章</a>
+                <a href="../pages/projects.html">项目</a>
+                <a href="../pages/about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <article class="article-page">
+        <header class="article-header">
+            <a href="../pages/articles.html" class="back-link">← 返回文章列表</a>
+            <h1 class="article-title">Python Import 系统：从 sys.modules 到 Import Hooks</h1>
+            <div class="article-meta">
+                <span class="article-tag tag-python">Python</span>
+                <span>2026-03-09</span>
+                <span>·</span>
+                <span>22 分钟阅读</span>
+            </div>
+        </header>
+
+        <div class="article-content">
+            <p class="lead">import 不只是读文件那么简单。理解 Python 的导入机制，才能解释为什么循环导入会失败，以及如何动态加载模块、实现插件系统。</p>
+
+            <h2>import 的完整流程</h2>
+            <p>当你写 <code>import foo.bar</code> 时，Python 内部经历了什么？</p>
+            <ol>
+                <li><strong>检查 sys.modules</strong>：如果已存在，直接返回</li>
+                <li><strong>创建模块对象</strong>：调用 types.ModuleType 创建空模块</li>
+                <li><strong>加入 sys.modules</strong>：在加载完成前就加入，这是处理循环导入的关键</li>
+                <li><strong>执行模块代码</strong>：找到 .py 文件并执行</li>
+                <li><strong>返回模块</strong>：import 语句得到模块对象</li>
+            </ol>
+            <p>关键点：模块在代码执行前就被放入 sys.modules，这让循环导入成为可能。</p>
+
+            <h2>sys.modules 的角色</h2>
+            <p>这是 Python 的模块缓存，所有已导入的模块都存在这里：</p>
+            <pre><code>import sys
+
+# 看看当前已加载的模块
+print(len(sys.modules))  # 通常几百个
+
+# 查看具体模块
+import os
+print(sys.modules['os'])  # &lt;module 'os' from '...'&gt;
+print(sys.modules['os'] is os)  # True，是同一个对象
+
+# 甚至可以手动注入模块
+import types
+fake = types.ModuleType('fake_module')
+fake.value = 42
+sys.modules['fake_module'] = fake
+
+import fake_module  # 不会报错，直接返回我们注入的模块
+print(fake_module.value)  # 42</code></pre>
+            <p>import 的本质就是查 sys.modules 字典。找不到才会去磁盘上找文件加载。</p>
+
+            <h2>模块的 __name__ 和 __package__</h2>
+            <p>直接运行脚本和 import 导入，模块的 __name__ 不同：</p>
+            <pre><code># test.py
+print(f"__name__: {__name__}")
+print(f"__file__: {__file__}")
+print(f"__package__: {__package__}")
+
+# 直接运行: python test.py
+# __name__: __main__
+# __file__: test.py
+# __package__: None
+
+# 作为模块导入: python -c "import test"
+# __name__: test
+# __file__: .../test.py
+# __package__: '' 或 None</code></pre>
+            <p>这就是为什么通常写：</p>
+            <pre><code>if __name__ == "__main__":
+    main()</code></pre>
+
+            <h2>相对导入的原理</h2>
+            <p>相对导入依赖 __package__：</p>
+            <pre><code># 包结构：
+# mypkg/
+#   __init__.py
+#   a.py
+#   sub/
+#     __init__.py
+#     b.py
+
+# 在 mypkg/sub/b.py 中
+from ..a import something  # .. 就是根据 __package__ 解析的</code></pre>
+            <p>相对导入的规则：</p>
+            <ul>
+                <li><code>.</code> 表示当前包</li>
+                <li><code>..</code> 表示父包</li>
+                <li><code>...</code> 表示祖父包，以此类推</li>
+            </ul>
+            <p>注意：相对导入只能在包内使用。直接运行包含相对导入的脚本会报错 <code>ImportError: attempted relative import with no known parent package</code>。</p>
+
+            <h2>循环导入的本质</h2>
+            <p>循环导入（Circular Import）是 Python 开发中的经典问题：</p>
+            <pre><code># a.py
+import b
+
+def func_a():
+    return b.func_b()
+
+# b.py
+import a
+
+def func_b():
+    return "from b"
+
+def call_a():
+    return a.func_a()  # 这里会失败！</code></pre>
+            <p>为什么会失败？让我们追踪导入过程：</p>
+            <ol>
+                <li>开始导入 a</li>
+                <li>创建模块 a，放入 sys.modules['a']</li>
+                <li>开始执行 a.py 的代码</li>
+                <li>执行到 <code>import b</code>，开始导入 b</li>
+                <li>创建模块 b，放入 sys.modules['b']</li>
+                <li>执行 b.py 的代码</li>
+                <li>执行到 <code>import a</code>，发现 sys.modules['a'] 已存在，直接返回！</li>
+                <li>但此时 a 模块还没有 func_a，因为 a.py 还没执行完</li>
+                <li>所以 <code>a.func_a()</code> 会 AttributeError</li>
+            </ol>
+            <p>解决方案：</p>
+            <pre><code># a.py - 延迟导入
+def func_a():
+    import b  # 在这里导入，而不是模块级别
+    return b.func_b()
+
+# 或者重新设计结构，把公共部分移到第三个模块
+# common.py
+# a.py -> from common import shared
+# b.py -> from common import shared</code></pre>
+
+            <h2>Import Hooks：自定义导入机制</h2>
+            <p>Python 的导入系统是可扩展的。通过实现 finders 和 loaders，你可以从任何地方加载模块：数据库、网络、内存、加密文件等。</p>
+            <pre><code># 最简单的自定义 loader：从字符串加载代码
+import sys
+import types
+import importlib.abc
+import importlib.machinery
+
+class StringLoader(importlib.abc.Loader):
+    def __init__(self, code):
+        self.code = code
+
+    def create_module(self, spec):
+        return None  # 使用默认模块创建
+
+    def exec_module(self, module):
+        exec(self.code, module.__dict__)
+
+class StringFinder(importlib.abc.MetaPathFinder):
+    def __init__(self, modules):
+        # modules: {模块名: 代码字符串}
+        self.modules = modules
+
+    def find_spec(self, fullname, path, target=None):
+        if fullname not in self.modules:
+            return None
+
+        spec = importlib.machinery.ModuleSpec(
+            fullname,
+            StringLoader(self.modules[fullname]),
+            origin="string"  # 假的源文件路径
+        )
+        return spec
+
+# 使用
+code_map = {
+    "dynamic_hello": '''
+def say():
+    return "Hello from dynamic module!"
+'''
+}
+
+sys.meta_path.insert(0, StringFinder(code_map))
+
+import dynamic_hello
+print(dynamic_hello.say())  # Hello from dynamic module!</code></pre>
+
+            <h2>实际应用：插件系统</h2>
+            <p>利用 import hooks 实现从特定目录动态加载插件：</p>
+            <pre><code>import sys
+import os
+import importlib.util
+import importlib.machinery
+
+class PluginLoader:
+    def __init__(self, plugin_dir):
+        self.plugin_dir = plugin_dir
+
+    def load(self, name):
+        """从插件目录加载指定模块"""
+        path = os.path.join(self.plugin_dir, f"{name}.py")
+        if not os.path.exists(path):
+            raise ImportError(f"Plugin {name} not found at {path}")
+
+        # 创建 module spec
+        spec = importlib.util.spec_from_file_location(
+            f"plugins.{name}",
+            path,
+            loader=importlib.machinery.SourceFileLoader(
+                f"plugins.{name}",
+                path
+            )
+        )
+
+        # 创建模块并执行
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module  # 先注册，支持循环导入
+        spec.loader.exec_module(module)
+
+        return module
+
+# 使用
+loader = PluginLoader("./plugins")
+my_plugin = loader.load("my_plugin")
+my_plugin.run()</code></pre>
+
+            <h2>实际应用：热重载</h2>
+            <p>开发服务器的热重载就是重新加载模块：</p>
+            <pre><code>import importlib
+import sys
+
+def reload_module(module_name):
+    """安全地重新加载模块"""
+    if module_name not in sys.modules:
+        return importlib.import_module(module_name)
+
+    # 获取旧模块
+    old_module = sys.modules[module_name]
+
+    # 重新加载
+    new_module = importlib.reload(old_module)
+
+    # 注意：reload 后，已经导入的旧引用不会自动更新
+    # 例如：
+    #   from mymodule import myfunc
+    # reload 后，myfunc 仍然是旧函数
+    # 必须用 import mymodule; mymodule.myfunc 才能看到新函数
+
+    return new_module
+
+# 更好的热重载方案：监控文件变化
+def watch_and_reload(module_name, callback):
+    import time
+    import os
+
+    module = sys.modules[module_name]
+    file_path = module.__file__
+    last_mtime = os.path.getmtime(file_path)
+
+    while True:
+        time.sleep(1)
+        current_mtime = os.path.getmtime(file_path)
+        if current_mtime != last_mtime:
+            print(f"Detected change in {module_name}, reloading...")
+            reload_module(module_name)
+            callback()
+            last_mtime = current_mtime</code></pre>
+
+            <h2>importlib 实用技巧</h2>
+            <p>标准库 importlib 提供了许多实用函数：</p>
+            <pre><code>import importlib
+
+# 动态导入
+module_name = "os.path"
+os_path = importlib.import_module(module_name)
+
+# 检查模块是否存在而不导入
+spec = importlib.util.find_spec("some_module")
+if spec is None:
+    print("Module not found")
+else:
+    print(f"Found at: {spec.origin}")
+
+# 从文件路径直接加载
+spec = importlib.util.spec_from_file_location(
+    "my_module",
+    "/path/to/my_module.py"
+)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+# 检查是否是模块
+import types
+print(ismodule = isinstance(some_obj, types.ModuleType))</code></pre>
+
+            <h2>总结</h2>
+            <ul>
+                <li>import 先查 sys.modules 缓存，找不到才去加载</li>
+                <li>模块在代码执行前就被注册到 sys.modules，这是循环导入的根本原因</li>
+                <li>相对导入依赖 __package__，只能在包内使用</li>
+                <li>通过 sys.meta_path 可以自定义模块查找和加载逻辑</li>
+                <li>importlib 提供了导入相关的所有工具函数</li>
+            </ul>
+        </div>
+    </article>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>

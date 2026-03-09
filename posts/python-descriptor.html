@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 描述符协议：property 背后的魔法 | vangee</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/article.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav scrolled" id="nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo"><span class="logo-text">vangee</span></a>
+            <div class="nav-links">
+                <a href="../index.html">首页</a>
+                <a href="../pages/articles.html">文章</a>
+                <a href="../pages/projects.html">项目</a>
+                <a href="../pages/about.html">关于</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeBtn" aria-label="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <article class="article-page">
+        <header class="article-header">
+            <a href="../pages/articles.html" class="back-link">← 返回文章列表</a>
+            <h1 class="article-title">Python 描述符协议：property 背后的魔法</h1>
+            <div class="article-meta">
+                <span class="article-tag tag-python">Python</span>
+                <span>2026-03-09</span>
+                <span>·</span>
+                <span>20 分钟阅读</span>
+            </div>
+        </header>
+
+        <div class="article-content">
+            <p class="lead">@property、@staticmethod、@classmethod 都基于同一个底层机制。理解描述符协议，你就理解了 Python 属性访问的本质。</p>
+
+            <h2>描述符是什么</h2>
+            <p>描述符（descriptor）是实现了 <code>__get__</code>、<code>__set__</code> 或 <code>__delete__</code> 方法的对象。当一个描述符被作为类属性存储时，它的这些特殊方法会在属性访问时被调用。</p>
+            <p>最简单的例子：</p>
+            <pre><code>class Descriptor:
+    def __get__(self, obj, objtype=None):
+        print(f"__get__ called: obj={obj}, objtype={objtype}")
+        return "descriptor value"
+
+    def __set__(self, obj, value):
+        print(f"__set__ called: obj={obj}, value={value}")
+
+class MyClass:
+    attr = Descriptor()
+
+obj = MyClass()
+print(obj.attr)      # 触发 __get__
+obj.attr = 42        # 触发 __set__</code></pre>
+            <p>注意：描述符必须是<strong>类属性</strong>，如果是实例属性，它不会生效。</p>
+
+            <h2>Data Descriptor vs Non-Data Descriptor</h2>
+            <p>这是理解描述符优先级的关键：</p>
+            <ul>
+                <li><strong>Data Descriptor</strong>：同时定义了 <code>__get__</code> 和 <code>__set__</code>（或 <code>__delete__</code>）。</li>
+                <li><strong>Non-Data Descriptor</strong>：只定义了 <code>__get__</code>。</li>
+            </ul>
+            <p>属性查找的优先级（从高到低）：</p>
+            <ol>
+                <li>Data Descriptor</li>
+                <li>实例的 __dict__ 中的属性</li>
+                <li>Non-Data Descriptor</li>
+                <li>类的 __dict__ 中的普通属性</li>
+            </ol>
+            <p>这就是为什么方法（method）可以被实例属性覆盖：</p>
+            <pre><code>class C:
+    def method(self):
+        return "from class"
+
+c = C()
+print(c.method())    # "from class"
+
+# method 是 non-data descriptor（只有 __get__）
+# 所以实例的 __dict__ 优先级更高
+c.method = lambda self: "from instance"
+print(c.method())    # "from instance"
+
+# 但 data descriptor 不能被覆盖
+class D:
+    @property
+    def value(self):
+        return "from descriptor"
+
+d = D()
+d.__dict__['value'] = "from instance"
+print(d.value)       # 仍然是 "from descriptor"，因为 property 是 data descriptor</code></pre>
+
+            <h2>手写 property</h2>
+            <p>property 其实就是用描述符实现的。简化版实现：</p>
+            <pre><code>class MyProperty:
+    def __init__(self, fget=None, fset=None, fdel=None):
+        self.fget = fget
+        self.fset = fset
+        self.fdel = fdel
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        if self.fget is None:
+            raise AttributeError("unreadable attribute")
+        return self.fget(obj)
+
+    def __set__(self, obj, value):
+        if self.fset is None:
+            raise AttributeError("can't set attribute")
+        self.fset(obj, value)
+
+    def __delete__(self, obj):
+        if self.fdel is None:
+            raise AttributeError("can't delete attribute")
+        self.fdel(obj)
+
+    def getter(self, fget):
+        return type(self)(fget, self.fset, self.fdel)
+
+    def setter(self, fset):
+        return type(self)(self.fget, fset, self.fdel)
+
+# 使用
+class Person:
+    def __init__(self, name):
+        self._name = name
+
+    @MyProperty
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not value:
+            raise ValueError("name cannot be empty")
+        self._name = value
+
+p = Person("Alice")
+print(p.name)    # Alice
+p.name = "Bob"   # 正常设置</code></pre>
+            <p>关键点：property 同时实现了 <code>__get__</code> 和 <code>__set__</code>，所以它是 data descriptor，优先级高于实例的 __dict__。</p>
+
+            <h2>staticmethod 和 classmethod 的秘密</h2>
+            <p>这两个装饰器也是描述符，但它们是 non-data descriptor：</p>
+            <pre><code>class MyStaticMethod:
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, objtype=None):
+        # 返回原函数，不绑定任何对象
+        return self.func
+
+class MyClassMethod:
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, objtype=None):
+        # 绑定到类
+        if objtype is None:
+            objtype = type(obj)
+        import functools
+        return functools.partial(self.func, objtype)
+
+class C:
+    @MyStaticMethod
+    def static_func():
+        return "static"
+
+    @MyClassMethod
+    def class_func(cls):
+        return f"class: {cls.__name__}"
+
+print(C.static_func())      # static
+print(C().static_func())    # static（不自动传 self）
+
+print(C.class_func())       # class: C
+print(C().class_func())     # class: C（自动传 cls）</code></pre>
+
+            <h2>实际应用：懒加载属性</h2>
+            <p>描述符的一个实用场景是懒加载（lazy loading）：</p>
+            <pre><code>class LazyProperty:
+    def __init__(self, func):
+        self.func = func
+        self.name = func.__name__
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        # 只执行一次，然后缓存到实例 __dict__
+        value = self.func(obj)
+        obj.__dict__[self.name] = value
+        return value
+
+# 使用
+class DataProcessor:
+    def __init__(self, data):
+        self.raw_data = data
+
+    @LazyProperty
+    def processed(self):
+        print("Processing... (this should only happen once)")
+        return [x * 2 for x in self.raw_data]
+
+dp = DataProcessor([1, 2, 3])
+print(dp.processed)   # Processing... 然后 [2, 4, 6]
+print(dp.processed)   # 直接 [2, 4, 6]，没有 "Processing..."
+
+# 原理：第一次访问时，__get__ 被调用，计算结果并存入 __dict__
+# 之后访问，由于 lazy_property 是 non-data descriptor，
+# 实例的 __dict__ 优先级更高，直接返回缓存值</code></pre>
+
+            <h2>实际应用：类型检查</h2>
+            <pre><code>class Typed:
+    def __init__(self, name, expected_type):
+        self.name = name
+        self.expected_type = expected_type
+
+    def __set__(self, obj, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError(f"Expected {self.expected_type}, got {type(value)}")
+        obj.__dict__[self.name] = value
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__.get(self.name)
+
+def typed(cls):
+    # 自动为所有 annotation 添加类型检查
+    hints = cls.__annotations__
+    for name, expected_type in hints.items():
+        setattr(cls, name, Typed(name, expected_type))
+    return cls
+
+@typed
+class Person:
+    name: str
+    age: int
+
+p = Person()
+p.name = "Alice"      # OK
+p.age = 30            # OK
+p.age = "thirty"      # TypeError: Expected &lt;class 'int'&gt;, got &lt;class 'str'&gt;</code></pre>
+
+            <h2>总结</h2>
+            <ul>
+                <li>描述符是实现了 <code>__get__</code>、<code>__set__</code> 或 <code>__delete__</code> 的对象</li>
+                <li>Data descriptor（有 __set__）优先级 > 实例 __dict__ > Non-data descriptor</li>
+                <li>@property、@staticmethod、@classmethod 都是基于描述符</li>
+                <li>方法本质是函数对象实现了描述符协议，自动绑定 self/cls</li>
+                <li>描述符可以实现懒加载、类型检查、ORM 字段等高级功能</li>
+            </ul>
+        </div>
+    </article>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>&copy; 2026 vangee. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>

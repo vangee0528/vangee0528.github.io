@@ -1,0 +1,247 @@
+﻿/* ============================================
+   article.css -- Apple 风格重设计
+   ============================================ */
+
+.article-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 128px 24px 96px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 40px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: gap var(--transition-fast);
+}
+.back-link:hover { gap: 10px; color: var(--accent); }
+
+.article-header {
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.article-tag {
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.tag-python  { background: rgba(55,118,171,0.12); color: #3776ab; }
+.tag-cpp     { background: rgba(0,89,156,0.12);   color: #00599c; }
+.tag-flutter { background: rgba(2,86,155,0.12);   color: #02569b; }
+.tag-matlab  { background: rgba(225,103,171,0.12);color: #c8589a; }
+.tag-latex   { background: rgba(0,128,128,0.12);  color: #007070; }
+
+[data-theme="dark"] .tag-python  { background: rgba(55,118,171,0.18); color: #5ba3d9; }
+[data-theme="dark"] .tag-cpp     { background: rgba(0,89,156,0.18);   color: #4fa3df; }
+[data-theme="dark"] .tag-flutter { background: rgba(2,86,155,0.18);   color: #4cafe8; }
+[data-theme="dark"] .tag-matlab  { background: rgba(225,103,171,0.18);color: #e08dbf; }
+[data-theme="dark"] .tag-latex   { background: rgba(0,128,128,0.18);  color: #3dbaba; }
+
+.article-meta > span { color: var(--text-tertiary); font-size: 0.875rem; }
+
+.article-title {
+    font-size: clamp(1.75rem,4vw,2.625rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    color: var(--text-primary);
+}
+
+.lead {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: var(--text-primary) !important;
+    font-weight: 400;
+    margin-bottom: 40px !important;
+    padding: 28px 32px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border-left: 4px solid var(--accent);
+}
+
+.article-content {
+    font-size: 1.0625rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+}
+
+.article-content h2 {
+    font-size: 1.625rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 56px 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.3;
+}
+
+.article-content h3 {
+    font-size: 1.1875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 36px 0 14px;
+    letter-spacing: -0.01em;
+}
+
+.article-content p {
+    margin-bottom: 22px;
+    color: var(--text-secondary);
+}
+
+.article-content strong { color: var(--text-primary); font-weight: 600; }
+
+.article-content a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+.article-content a:hover { border-bottom-color: var(--accent); }
+
+.article-content code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875em;
+    background: var(--bg-secondary);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.article-content pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 24px 28px;
+    border-radius: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.75;
+    margin: 28px 0;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.article-content pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+    white-space: pre;
+}
+
+.article-content ul,
+.article-content ol {
+    padding-left: 0;
+    color: var(--text-secondary);
+    margin: 20px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.article-content li {
+    padding-left: 24px;
+    position: relative;
+    line-height: 1.7;
+}
+
+.article-content ul li::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 12px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.article-content ol { counter-reset: list-cnt; }
+.article-content ol li::before {
+    counter-increment: list-cnt;
+    content: counter(list-cnt) '.';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.875em;
+    top: 1px;
+}
+
+.article-content li > ul,
+.article-content li > ol { margin: 8px 0 0; }
+
+.article-content blockquote {
+    margin: 32px 0;
+    padding: 20px 24px 20px 28px;
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.article-content th {
+    background: var(--bg-secondary);
+    padding: 13px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.article-content td {
+    padding: 13px 16px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+}
+
+.article-content tr:last-child td { border-bottom: none; }
+
+.article-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+}
+
+@media (max-width: 768px) {
+    .article-page { padding: 104px 16px 72px; }
+    .article-title { font-size: 1.75rem; }
+    .article-content h2 { font-size: 1.375rem; margin: 40px 0 16px; }
+    .article-content h3 { font-size: 1.0625rem; }
+    .article-content pre { padding: 18px 16px; font-size: 0.8125rem; border-radius: 12px; }
+    .lead { font-size: 1.0625rem; padding: 20px; }
+}
