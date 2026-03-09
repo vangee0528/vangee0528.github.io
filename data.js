@@ -77,57 +77,34 @@ const blogData = {
     projects: [
         {
             id: 1,
-            title: "个人博客系统",
-            description: "基于 React + Node.js + PostgreSQL 构建的全栈博客平台，支持 Markdown 编辑、评论系统、RSS 订阅。",
-            tags: ["React", "Node.js", "PostgreSQL", "TypeScript"],
-            image: "📝",
-            github: "https://github.com/vangee0528/blog",
-            demo: "https://vangee0528.github.io"
+            title: "炉羽饰品生产管理系统",
+            description: "基于 Flutter 开发的跨平台生产管理应用，支持员工管理、产品管理、生产记录、工资统计等功能。采用 SQLite 本地存储，支持离线运行和 WebDAV 云备份。",
+            tags: ["Flutter", "SQLite", "Provider", "Material Design 3"],
+            image: "🏭",
+            github: "",
+            demo: "",
+            detail: "projects/luyu_manager.html",
+            highlights: [
+                "跨平台支持 Windows 和 Android",
+                "计件/计时两种员工工资模式",
+                "自动工资计算与 Excel 报表导出",
+                "本地备份与 WebDAV 云备份"
+            ]
         },
         {
             id: 2,
-            title: "AI 智能助手",
-            description: "基于 LangChain 和 OpenAI API 构建的智能对话助手，支持多轮对话、知识库检索、文件解析。",
-            tags: ["Python", "LangChain", "OpenAI", "FastAPI"],
-            image: "🤖",
-            github: "https://github.com/vangee0528/ai-assistant",
-            demo: ""
-        },
-        {
-            id: 3,
-            title: "实时协作白板",
-            description: "支持多人实时协作的在线白板应用，使用 WebSocket 实现毫秒级同步。",
-            tags: ["Vue 3", "WebSocket", "Canvas", "Node.js"],
-            image: "🎨",
-            github: "https://github.com/vangee0528/collab-board",
-            demo: "https://collab-board.demo.com"
-        },
-        {
-            id: 4,
-            title: "自动化部署平台",
-            description: "基于 Docker 和 Kubernetes 的 CI/CD 自动化部署平台，支持多环境管理。",
-            tags: ["Go", "Docker", "Kubernetes", "CI/CD"],
-            image: "🚀",
-            github: "https://github.com/vangee0528/deploy-platform",
-            demo: ""
-        },
-        {
-            id: 5,
-            title: "代码片段管理器",
-            description: "跨平台代码片段管理工具，支持语法高亮、标签分类、快速搜索。",
-            tags: ["Electron", "React", "SQLite", "CodeMirror"],
-            image: "💾",
-            github: "https://github.com/vangee0528/snippet-manager",
-            demo: ""
-        },
-        {
-            id: 6,
-            title: "微信小程序商城",
-            description: "完整的微信小程序电商解决方案，包含商品管理、购物车、订单系统。",
-            tags: ["微信小程序", "Node.js", "MongoDB", "Redis"],
-            image: "🛒",
-            github: "https://github.com/vangee0528/wx-mall",
-            demo: ""
+            title: "数值分析作业集 (NA2024)",
+            description: "浙江大学 2024 年数值分析课程作业集，包含理论作业、编程作业和期末项目。实现了方程求解、插值方法、样条曲线拟合等核心算法。",
+            tags: ["C++", "Python", "数值分析", "算法"],
+            image: "📊",
+            github: "https://github.com/vangee0528/NA2024",
+            demo: "",
+            detail: "projects/na2024.html",
+            highlights: [
+                "理论作业 4 次，涵盖数值分析核心理论",
+                "编程作业 2 次，C++ 实现方程求解与插值算法",
+                "期末项目：B 样条曲线拟合库，支持 JSON 配置"
+            ]
         }
     ]
 };
